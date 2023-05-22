@@ -1,13 +1,3 @@
-$('div.context_module div.ig-header-admin ul.al-options')
-    .append(`<li role="presentation" class="ui-menu-item">
-              <a href="#" class="link_section_link icon-link ui-corner-all" title="Link to section" tabindex="-1" role="menuitem">Link to section</a>
-            </li>`);
-
-$('.link_section_link').click((s) => {
-    console.log(s);
-    return false;
-});
-
 let sections = [];
 fetch(`/api/v1/courses/${ENV.course_id}/sections`).then(c => c.json()).then(c => {
     sections = c;
@@ -45,7 +35,7 @@ fetch(`/api/v1/courses/${ENV.course_id}/sections`).then(c => c.json()).then(c =>
 
 let sectionSelect = null;
 
-const links = document.querySelectorAll('.edit_module_link');
+const links = document.querySelectorAll('.edit_module_link,.add_module_link');
 for (const link of links) {
     link.addEventListener('click', () => {
         const nameBox = document.querySelector('#context_module_name');
