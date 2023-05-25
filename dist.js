@@ -1,4 +1,11 @@
 let sections = [];
+
+function getGroup(name) {
+    const index = name.lastIndexOf('[');
+    if (index === -1 || !name.endsWith(']')) return null;
+    return name.substring(index + 1, name.length - 1);
+}
+
 fetch(`/api/v1/courses/${ENV.course_id}/sections`).then(c => c.json()).then(c => {
     sections = c;
     const sectionFilter = $(`<select>
@@ -12,9 +19,10 @@ fetch(`/api/v1/courses/${ENV.course_id}/sections`).then(c => c.json()).then(c =>
         for (const mod of modules) {
             const name = mod.attributes["aria-label"].value;
             if (!name) continue;
+            const group = getGroup(name);
             mod.style.display = sectionFilter.selectedIndex === 0
-                || !name.includes(' | ')
-                || name.includes(sections[sectionFilter.selectedIndex - 1].name + " | ")
+                || !group
+                || group === sections[sectionFilter.selectedIndex - 1].name
                     ? 'block' : 'none';
         }
     }
@@ -49,16 +57,16 @@ for (const link of links) {
                 .append(sectionSelect);
 
             sectionSelect.addEventListener('change', () => {
-                const part = nameBox.value.includes(' | ') ? nameBox.value.split(' | ').slice(1).join(' | ').trim() : nameBox.value;
-                nameBox.value = sectionSelect.selectedIndex === 0 ? part : `${sections[sectionSelect.selectedIndex - 1].name} | ${part}`;
+                const part = getGroup(nameBox.value) ? nameBox.value.substring(0, nameBox.value.lastIndexOf('[')).trim() : nameBox.value;
+                nameBox.value = sectionSelect.selectedIndex === 0 ? part : `${part} [${sections[sectionSelect.selectedIndex - 1].name}]`;
             });
         }
 
         setTimeout(() => {
             sectionSelect.selectedIndex = 0;
-            if (nameBox.value.includes(' | ')) {
-                const current = nameBox.value.split(' | ')[0];
-                const section = sections.findIndex(z => z.name === current);
+            const group = getGroup(nameBox.value);
+            if (group) {
+                const section = sections.findIndex(z => z.name === group);
                 if (section >= 0) {
                     sectionSelect.selectedIndex = section + 1;
                 }
